@@ -1,6 +1,26 @@
-import requests
-import schedule
-from datetime import datetime
+#!/usr/bin/env python
+
+# Copyright 2015, Google, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Command-line application that loads data into BigQuery via HTTP POST.
+This sample is used on this page:
+    https://cloud.google.com/bigquery/loading-data-into-bigquery
+For more information, see the README.md under /bigquery.
+"""
+
+import argparse
+import json
 import time
 
 from googleapiclient import discovery
@@ -18,8 +38,6 @@ schema = [
 ]
 data_path = "bq_test.csv"
 
-clientId = {'client_id': '68tskg1eib5q4n0kzsa2i3wl0egcow', 'limit': '100', 'game' : 'Arma 3'}
-twitch_request = requests.get('https://api.twitch.tv/kraken/streams/', params=clientId).json()
 
 # [START make_post]
 def load_data(schema_path, data_path, project_id, dataset_id, table_id):
@@ -90,39 +108,11 @@ def load_data(schema_path, data_path, project_id, dataset_id, table_id):
 
 
 # [START main]
-
-# [END main]
-
-def get_date_from_twitch():
-    print("start script")
-    current_time = str(datetime.now())
-    with open('bq_test.csv', 'w') as csv_file:
-        for channel in twitch_request["streams"]:
-            try:
-                row = current_time + "," + channel["channel"]["name"] + "," + str(channel["viewers"]) + "\n"
-                csv_file.write(row)
-                print(row)
-            except:
-                row = current_time + "," + channel["channel"]["name"] + "," + str(0) + "\n"
-                csv_file.write(row)
-                print(row)
-    print("start loading")
-    load_data(
+load_data(
         schema,
         data_path,
         project_id,
         dataset_id,
         table_name)
+# [END main]
 
-
-
-
-
-schedule.every(30).minutes.do(get_date_from_twitch)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
-# print(r.json())
-
-# with open('file_tw.txt','w') as file:
-#    json.dump(r, file)
